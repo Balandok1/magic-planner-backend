@@ -13,6 +13,21 @@ app.get('/', (req, res) => {
     res.send('Servidor do Magic Planner está no ar!');
 });
 
+app.get('/decks', async (req, res) => {
+    try {
+        const decks = await prisma.deck.findMany({
+            include: {
+                cards: true,
+            },
+        });
+        
+        res.json(decks);
+    } catch (error) {
+        console.error('Erro ao buscar os decks:', error);
+        res.status(500).json({ error: 'Não foi possível buscar os decks.' });
+    }
+});
+
 app.post('/decks', async (req, res) => {
     const { name, cards } = req.body;
 
