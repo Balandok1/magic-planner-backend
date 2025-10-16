@@ -44,6 +44,22 @@ app.post('/decks', async (req, res) => {
     }
  });
 
+ app.delete('/decks/:name', async (req, res) => {
+    const { name } = req.params;
+
+    try {
+        await prisma.deck.delete({
+            where: {
+                name: name,
+            },
+        });
+        res.status(204).send();
+    } catch (error) {
+        console.error('Erro ao deletar o deck:', error);
+        res.status(500).json({ error: 'Não foi possível deletar o deck' });
+    }
+ });
+
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta http://localhost:${PORT}`);
 });
