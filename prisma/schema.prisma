@@ -22,7 +22,7 @@ model Card {
   
   // Relação com o Deck
   deckId Int
-  deck   Deck @relation(fields: [deckId], references: [id])
+  deck   Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
 }
 
 datasource db {
