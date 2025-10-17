@@ -23,9 +23,16 @@ model Card {
   cmc        Float?
   image_uris String? // Salvaremos o JSON da imagem como uma string
   
-  // Relação com o Deck
   deckId Int
   deck   Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  tags   Tag[]
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  cards Card[] // <--- E ESSA LINHA PRECISA ESTAR AQUI
 }
 
 datasource db {
