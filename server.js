@@ -10,15 +10,30 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas da API
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send('Servidor do Magic Planner está no ar!');
 });
 
 app.get('/decks', async (_req, res) => {
   try {
     const decks = await prisma.deck.findMany({
-      include: { cards: true },
+      include: {
+        cards: {
+          include: {
+            tags: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      }
     });
+
+    if (!Array.isArray(decks)) {
+      throw new Error('Resultado do Prisma não é um array!');
+    }
+
     res.json(decks);
   } catch (error) {
     res.status(500).json({ error: "Não foi possível buscar os decks." });
@@ -79,6 +94,12 @@ app.put('/decks/:name', async (req, res) => {
               type_line: entry.card.type_line,
               cmc: entry.card.cmc,
               image_uris: JSON.stringify(entry.card.image_uris),
+              tags: {
+                connectOrCreate: (entry.tags || []).map(tagName => ({
+                  where: { name: tagName },
+                  create: { name: tagName },
+                })),
+              }
             })),
           },
         },
