@@ -15,10 +15,13 @@ model Deck {
 }
 
 model Card {
-  id        Int     @id @default(autoincrement())
-  scryfallId String // O ID que vem da API do Scryfall
-  name      String
-  quantity  Int
+  id         Int     @id @default(autoincrement())
+  scryfallId String
+  name       String
+  quantity   Int
+  type_line  String? // O '?' torna o campo opcional, uma boa prática
+  cmc        Float?
+  image_uris String? // Salvaremos o JSON da imagem como uma string
   
   // Relação com o Deck
   deckId Int
