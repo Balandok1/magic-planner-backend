@@ -7,7 +7,8 @@ const prisma = new PrismaClient();
 const PORT = 3001;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true}));
 
 // Rotas da API
 app.get('/', (_req, res) => {
@@ -19,7 +20,15 @@ app.get('/decks', async (_req, res) => {
     const decks = await prisma.deck.findMany({
       include: {
         cards: {
-          include: {
+          select: {
+            id: true,
+            scryfallId: true,
+            name: true,
+            quantity: true,
+            type_line: true,
+            cmc: true,
+            image_uris: true,
+            deckId: true,
             tags: {
               select: {
                 name: true
@@ -29,13 +38,9 @@ app.get('/decks', async (_req, res) => {
         }
       }
     });
-
-    if (!Array.isArray(decks)) {
-      throw new Error('Resultado do Prisma não é um array!');
-    }
-
     res.json(decks);
   } catch (error) {
+    console.error("Erro ao buscar os decks com detalhes completos:", error);
     res.status(500).json({ error: "Não foi possível buscar os decks." });
   }
 });
@@ -91,9 +96,9 @@ app.put('/decks/:name', async (req, res) => {
               scryfallId: entry.card.id,
               name: entry.card.name,
               quantity: entry.quantity,
-              type_line: entry.card.type_line,
-              cmc: entry.card.cmc,
-              image_uris: JSON.stringify(entry.card.image_uris),
+              type_line: entry.card.type_line || '',
+              cmc: entry.card.cmc || 0,
+              image_uris: JSON.stringify(entry.card.image_uris || {}),
               tags: {
                 connectOrCreate: (entry.tags || []).map(tagName => ({
                   where: { name: tagName },
